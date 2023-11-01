@@ -201,10 +201,10 @@ class Web {
             msg.replace("\r\n", "<rn>");
             if (mSerialAddTime) {
                 if ((9 + mSerialBufFill) < WEB_SERIAL_BUF_SIZE) {
-                    //OC: if (mApp->getTimestamp() > 0) {
-                    //OC:    strncpy(&mSerialBuf[mSerialBufFill], mApp->getTimeStr(mApp->getTimezoneOffset()).c_str(), 9);
-                    //OC:    mSerialBufFill += 9;
-                    //OC:}
+                    if (mApp->getTimestamp() > 0) {
+                       strncpy(&mSerialBuf[mSerialBufFill], mApp->getTimeStr(mApp->getTimezoneOffset()).c_str(), 9);
+                        mSerialBufFill += 9;
+                    }
                 } else {
                     mSerialBufFill = 0;
                     mEvts.send("webSerial, buffer overflow!<rn>", "serial", millis());

@@ -170,8 +170,9 @@ class RestApi {
         }
 
         void getGeneric(AsyncWebServerRequest *request, JsonObject obj) {
+            obj[F("web_refresh")] = 5;
             obj[F("wifi_rssi")]   = (WiFi.status() != WL_CONNECTED) ? 0 : WiFi.RSSI();
-            // obj[F("ts_uptime")]   = mApp->getUptime();
+            obj[F("ts_uptime")]   = mApp->getUptime();
             obj[F("ts_now")]      = mApp->getTimestamp();
             obj[F("version")]     = String(mApp->getVersion());
             obj[F("build")]       = String(AUTO_GIT_HASH);
@@ -234,7 +235,7 @@ class RestApi {
         }
 
         void getHtmlSave(AsyncWebServerRequest *request, JsonObject obj) {
-            // getGeneric(request, obj.createNestedObject(F("generic")));
+            getGeneric(request, obj.createNestedObject(F("generic")));
             // obj["pending"] = (bool)mApp->getSavePending();
             // obj["success"] = (bool)mApp->getLastSaveSucceed();
             // obj["reboot"] = (bool)mApp->getShouldReboot();
@@ -301,131 +302,143 @@ class RestApi {
         }
 
         void getIndex(AsyncWebServerRequest *request, JsonObject obj) {
-            // getGeneric(request, obj.createNestedObject(F("generic")));
-            // obj[F("ts_now")]       = mApp->getTimestamp();
-            // obj[F("ts_sunrise")]   = mApp->getSunrise();
-            // obj[F("ts_sunset")]    = mApp->getSunset();
-            // obj[F("ts_offset")]    = mConfig->sun.offsetSec;
+            DPRINTLN(DBG_INFO, "RestApi: getIndex called");
+            getGeneric(request, obj.createNestedObject(F("generic")));
+            obj[F("ts_now")]       = mApp->getTimestamp();
 
-            
-            // if((!mApp->getMqttIsConnected()) && (String(mConfig->mqtt.broker).length() > 0))
-            //     warn.add(F("MQTT is not connected"));
+            char out[300];
+            serializeJson(obj, out, 300);
+            DPRINTLN(DBG_INFO, "RestApi: getIndex " + String(out) );
+           // obj[F("ts_sunrise")]   = mApp->getSunrise();
+           // obj[F("ts_sunset")]    = mApp->getSunset();
+           // obj[F("ts_offset")]    = mConfig->sun.offsetSec;
 
-            // JsonArray info = obj.createNestedArray(F("infos"));
-            // if(mApp->getMqttIsConnected())
-            //     info.add(F("MQTT is connected, ") + String(mApp->getMqttTxCnt()) + F(" packets sent, ") + String(mApp->getMqttRxCnt()) + F(" packets received"));
-            // if(mConfig->mqtt.interval > 0)
-            //     info.add(F("MQTT publishes in a fixed interval of ") + String(mConfig->mqtt.interval) + F(" seconds"));
-        }
 
-        void getSetup(AsyncWebServerRequest *request, JsonObject obj) {
+           // if((!mApp->getMqttIsConnected()) && (String(mConfig->mqtt.broker).length() > 0))
+           //     warn.add(F("MQTT is not connected"));
+
+           // JsonArray info = obj.createNestedArray(F("infos"));
+           // if(mApp->getMqttIsConnected())
+           //     info.add(F("MQTT is connected, ") + String(mApp->getMqttTxCnt()) + F(" packets sent, ") + String(mApp->getMqttRxCnt()) + F(" packets received"));
+           // if(mConfig->mqtt.interval > 0)
+           //     info.add(F("MQTT publishes in a fixed interval of ") + String(mConfig->mqtt.interval) + F(" seconds"));
+       }
+
+       void getSetup(AsyncWebServerRequest *request, JsonObject obj) {
+            DPRINTLN(DBG_INFO, "RestApi: getSetup called");
             getGeneric(request, obj.createNestedObject(F("generic")));
             getSysInfo(request, obj.createNestedObject(F("system")));
             getMqtt(obj.createNestedObject(F("mqtt")));
             getNtp(obj.createNestedObject(F("ntp")));
             getSun(obj.createNestedObject(F("sun")));
             getStaticIp(obj.createNestedObject(F("static_ip")));
-        }
+            char out[300];
+            serializeJson(obj, out, 300);
+            DPRINTLN(DBG_INFO, "RestApi: getSetup " + String(out));
+       }
 
-        void getNetworks(JsonObject obj) {
-            mApp->getAvailNetworks(obj);
-        }
+       void getNetworks(JsonObject obj) {
+           mApp->getAvailNetworks(obj);
+       }
 
-        void getLive(AsyncWebServerRequest *request, JsonObject obj) {
-            // getGeneric(request, obj.createNestedObject(F("generic")));
-            // obj[F("refresh")] = mConfig->nrf.sendInterval;
+       void getLive(AsyncWebServerRequest *request, JsonObject obj) {
+           getGeneric(request, obj.createNestedObject(F("generic")));
+           // obj[F("refresh")] = mConfig->nrf.sendInterval;
 
-            // for (uint8_t fld = 0; fld < sizeof(acList); fld++) {
-            //     obj[F("ch0_fld_units")][fld] = String(units[fieldUnits[acList[fld]]]);
-            //     obj[F("ch0_fld_names")][fld] = String(fields[acList[fld]]);
-            // }
-            // for (uint8_t fld = 0; fld < sizeof(dcList); fld++) {
-            //     obj[F("fld_units")][fld] = String(units[fieldUnits[dcList[fld]]]);
-            //     obj[F("fld_names")][fld] = String(fields[dcList[fld]]);
-            // }
+           // for (uint8_t fld = 0; fld < sizeof(acList); fld++) {
+           //     obj[F("ch0_fld_units")][fld] = String(units[fieldUnits[acList[fld]]]);
+           //     obj[F("ch0_fld_names")][fld] = String(fields[acList[fld]]);
+           // }
+           // for (uint8_t fld = 0; fld < sizeof(dcList); fld++) {
+           //     obj[F("fld_units")][fld] = String(units[fieldUnits[dcList[fld]]]);
+           //     obj[F("fld_names")][fld] = String(fields[dcList[fld]]);
+           // }
 
-            // Inverter<> *iv;
-            // for(uint8_t i = 0; i < MAX_NUM_INVERTERS; i ++) {
-            //     iv = mSys->getInverterByPos(i);
-            //     bool parse = false;
-            //     if(NULL != iv)
-            //         parse = iv->config->enabled;
-            //     obj[F("iv")][i] = parse;
-            // }
-        }
+           // Inverter<> *iv;
+           // for(uint8_t i = 0; i < MAX_NUM_INVERTERS; i ++) {
+           //     iv = mSys->getInverterByPos(i);
+           //     bool parse = false;
+           //     if(NULL != iv)
+           //         parse = iv->config->enabled;
+           //     obj[F("iv")][i] = parse;
+           // }
+       }
 
 
-        bool setCtrl(JsonObject jsonIn, JsonObject jsonOut) {
-            // Inverter<> *iv = mSys->getInverterByPos(jsonIn[F("id")]);
-            // bool accepted = true;
-            // if(NULL == iv) {
-            //     jsonOut[F("error")] = F("inverter index invalid: ") + jsonIn[F("id")].as<String>();
-            //     return false;
-            // }
+       bool setCtrl(JsonObject jsonIn, JsonObject jsonOut) {
+           // Inverter<> *iv = mSys->getInverterByPos(jsonIn[F("id")]);
+           // bool accepted = true;
+           // if(NULL == iv) {
+           //     jsonOut[F("error")] = F("inverter index invalid: ") + jsonIn[F("id")].as<String>();
+           //     return false;
+           // }
 
-            // if(F("power") == jsonIn[F("cmd")])
-            //     accepted = iv->setDevControlRequest((jsonIn[F("val")] == 1) ? TurnOn : TurnOff);
-            // else if(F("restart") == jsonIn[F("cmd")])
-            //     accepted = iv->setDevControlRequest(Restart);
-            // else if(0 == strncmp("limit_", jsonIn[F("cmd")].as<const char*>(), 6)) {
-            //     iv->powerLimit[0] = jsonIn["val"];
-            //     if(F("limit_persistent_relative") == jsonIn[F("cmd")])
-            //         iv->powerLimit[1] = RelativPersistent;
-            //     else if(F("limit_persistent_absolute") == jsonIn[F("cmd")])
-            //         iv->powerLimit[1] = AbsolutPersistent;
-            //     else if(F("limit_nonpersistent_relative") == jsonIn[F("cmd")])
-            //         iv->powerLimit[1] = RelativNonPersistent;
-            //     else if(F("limit_nonpersistent_absolute") == jsonIn[F("cmd")])
-            //         iv->powerLimit[1] = AbsolutNonPersistent;
+           // if(F("power") == jsonIn[F("cmd")])
+           //     accepted = iv->setDevControlRequest((jsonIn[F("val")] == 1) ? TurnOn : TurnOff);
+           // else if(F("restart") == jsonIn[F("cmd")])
+           //     accepted = iv->setDevControlRequest(Restart);
+           // else if(0 == strncmp("limit_", jsonIn[F("cmd")].as<const char*>(), 6)) {
+           //     iv->powerLimit[0] = jsonIn["val"];
+           //     if(F("limit_persistent_relative") == jsonIn[F("cmd")])
+           //         iv->powerLimit[1] = RelativPersistent;
+           //     else if(F("limit_persistent_absolute") == jsonIn[F("cmd")])
+           //         iv->powerLimit[1] = AbsolutPersistent;
+           //     else if(F("limit_nonpersistent_relative") == jsonIn[F("cmd")])
+           //         iv->powerLimit[1] = RelativNonPersistent;
+           //     else if(F("limit_nonpersistent_absolute") == jsonIn[F("cmd")])
+           //         iv->powerLimit[1] = AbsolutNonPersistent;
 
-            //     accepted = iv->setDevControlRequest(ActivePowerContr);
-            // }
-            // else if(F("dev") == jsonIn[F("cmd")]) {
-            //     DPRINTLN(DBG_INFO, F("dev cmd"));
-            //     iv->enqueCommand<InfoCommand>(jsonIn[F("val")].as<int>());
-            // }
-            // else {
-            //     jsonOut[F("error")] = F("unknown cmd: '") + jsonIn["cmd"].as<String>() + "'";
-            //     return false;
-            // }
+           //     accepted = iv->setDevControlRequest(ActivePowerContr);
+           // }
+           // else if(F("dev") == jsonIn[F("cmd")]) {
+           //     DPRINTLN(DBG_INFO, F("dev cmd"));
+           //     iv->enqueCommand<InfoCommand>(jsonIn[F("val")].as<int>());
+           // }
+           // else {
+           //     jsonOut[F("error")] = F("unknown cmd: '") + jsonIn["cmd"].as<String>() + "'";
+           //     return false;
+           // }
 
-            // if(!accepted) {
-            //     jsonOut[F("error")] = F("inverter does not accept dev control request at this moment");
-            //     return false;
-            // } else
-            //     mApp->ivSendHighPrio(iv);
+           // if(!accepted) {
+           //     jsonOut[F("error")] = F("inverter does not accept dev control request at this moment");
+           //     return false;
+           // } else
+           //     mApp->ivSendHighPrio(iv);
 
-            return true;
-        }
+           return true;
+       }
 
-        bool setSetup(JsonObject jsonIn, JsonObject jsonOut) {
-            if(F("scan_wifi") == jsonIn[F("cmd")]) {
+       bool setSetup(JsonObject jsonIn, JsonObject jsonOut) {
+            char out[300];
+            serializeJson(jsonIn, out, 300);
+            DPRINTLN(DBG_INFO, "RestApi: setSetup " + String(out));
+            if(F("scan_wifi") == jsonIn[F("cmd")])
                 mApp->scanAvailNetworks();
-            
-            // OC else if(F("set_time") == jsonIn[F("cmd")]) 
-            // OC     mApp->setTimestamp(jsonIn[F("val")]);
-            // OC else if(F("sync_ntp") == jsonIn[F("cmd")])
-            // OC     mApp->setTimestamp(0); // 0: update ntp flag
-            // OC else if(F("serial_utc_offset") == jsonIn[F("cmd")])
-            // OC     mTimezoneOffset = jsonIn[F("val")];
-            // OC else if(F("discovery_cfg") == jsonIn[F("cmd")]) 
-            // OC     mApp->setMqttDiscoveryFlag(); // for homeassistant
-            } else {
-                jsonOut[F("error")] = F("unknown cmd");
-                return false;
-            }
+            else 
+                if(F("set_time") == jsonIn[F("cmd")])
+                    mApp->setTimestamp(jsonIn[F("val")]);
+                else if(F("sync_ntp") == jsonIn[F("cmd")])
+                    mApp->setTimestamp(0); // 0: update ntp flag
+                else if(F("serial_utc_offset") == jsonIn[F("cmd")])
+                    mTimezoneOffset = jsonIn[F("val")];
+                else if(F("discovery_cfg") == jsonIn[F("cmd")]) {
+                    //mApp->setMqttDiscoveryFlag(); // for homeassistant
+                } else {
+                    jsonOut[F("error")] = F("unknown cmd");
+                    return false;
+                }
 
-            return true;
-        }
+           return true;
+       }
 
-        IApp *mApp;
-        AsyncWebServer *mSrv;
-        settings_t *mConfig;
+       IApp *mApp;
+       AsyncWebServer *mSrv;
+       settings_t *mConfig;
 
-        uint32_t mTimezoneOffset;
-        uint32_t mHeapFree, mHeapFreeBlk;
-        uint8_t mHeapFrag;
-        uint16_t nr;
+       uint32_t mTimezoneOffset;
+       uint32_t mHeapFree, mHeapFreeBlk;
+       uint8_t mHeapFrag;
+       uint16_t nr;
 };
 
 #endif /*__WEB_API_H__*/

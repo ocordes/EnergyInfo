@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Setup</title>
+        {#HTML_HEADER}
+    </head>
+    <body>
+        {#HTML_NAV}
+        <div id="wrapper">
+            <div id="content">
+                <form method="post" action="/save" id="settings">
+                    <fieldset>
+                    <button type="button" class="s_collapsible mt-4">System Config</button>
+                    <div class="s_content">
+                    <fieldset class="mb-2">
+                        <legend class="des">Device Host Name</legend>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3">Device Name</div>
+                            <div class="col-12 col-sm-9"><input type="text" name="device"/></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-8 col-sm-3">Reboot Ahoy at midnight</div>
+                            <div class="col-4 col-sm-9"><input type="checkbox" name="schedReboot"/></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-8 col-sm-3">Dark Mode</div>
+                            <div class="col-4 col-sm-9"><input type="checkbox" name="darkMode"/></div>
+                            <div class="col-12">(empty browser cache or use CTRL + F5 after reboot to apply this setting)</div>
+                        </div>
+                    </fieldset>
+                    </div>
+
+                    <button type="button" class="s_collapsible">Network</button>
+                    <div class="s_content">
+                        <fieldset class="mb-2">
+                            <legend class="des">WiFi</legend>
+
+                            <div class="row mb-3">
+                                <div class="col-12 col-sm-3 my-2">AP Password (min. length: 8)</div>
+                                <div class="col-12 col-sm-9"><input type="text" name="ap_pwd" minlength="8" /></div>
+                            </div>
+
+                            <p>Enter the credentials to your prefered WiFi station. After rebooting the device tries to connect with this information.</p>
+
+                            <div class="row mb-3">
+                                <div class="col-12 col-sm-3 my-2">Search Networks</div>
+                                <div class="col-12 col-sm-9"><input type="button" name="scanbtn" id="scanbtn" class="btn" value="scan" onclick="scan()"/></div>
+                            </div>
+
+                            <div class="row mb-2 mb-sm-3">
+                                <div class="col-12 col-sm-3 my-2">Avail Networks</div>
+                                <div class="col-12 col-sm-9">
+                                    <select name="networks" id="networks" onChange="selNet()">
+                                        <option value="-1" selected disabled hidden>not scanned</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-2 mb-sm-3">
+                                <div class="col-12 col-sm-3 my-2">SSID</div>
+                                <div class="col-12 col-sm-9"><input type="text" name="ssid"/></div>
+                            </div>
+                            <div class="row mb-2 mb-sm-3">
+                                <div class="col-12 col-sm-3">SSID is hidden</div>
+                                <div class="col-12 col-sm-9"><input type="checkbox" name="hidd"/></div>
+                            </div>
+                            <div class="row mb-2 mb-sm-3">
+                                <div class="col-12 col-sm-3 my-2">Password</div>
+                                <div class="col-12 col-sm-9"><input type="password" name="pwd" value="{PWD}"/></div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="mb-4">
+                            <legend class="des">Static IP (optional)</legend>
+                            <p>
+                                Leave fields blank for DHCP<br/>
+                                The following fields are parsed in this format: 192.168.4.1
+                            </p>
+                            <div class="row mb-3">
+                                <div class="col-12 col-sm-3 my-2">IP Address</div>
+                                <div class="col-12 col-sm-9"><input type="text" name="ipAddr" maxlength="15" /></div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-sm-3 my-2">Submask</div>
+                                <div class="col-12 col-sm-9"><input type="text" name="ipMask" maxlength="15" /></div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-sm-3 my-2">DNS 1</div>
+                                <div class="col-12 col-sm-9"><input type="text" name="ipDns1" maxlength="15" /></div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-sm-3 my-2">DNS 2</div>
+                                <div class="col-12 col-sm-9"><input type="text" name="ipDns2" maxlength="15" /></div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-sm-3 my-2">Gateway</div>
+                                <div class="col-12 col-sm-9"><input type="text" name="ipGateway" maxlength="15" /></div>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <button type="button" class="s_collapsible">Protection</button>
+                    <div class="s_content">
+                        <fieldset class="mb-4">
+                            <legend class="des mx-2">Protection</legend>
+                            <div class="row mb-3">
+                                <div class="col-12 col-sm-3 mb-2 mt-2">Admin Password</div>
+                                <div class="col-12 col-sm-9"><input type="password" name="adminpwd" value="{PWD}"/></div>
+                            </div>
+                            <p>Select pages which should be protected by password</p>
+                            <div id="prot_mask"></div>
+                        </fieldset>
+                    </div>
+
+                    <button type="button" class="s_collapsible">NTP Server</button>
+                    <div class="s_content">
+                    <fieldset class="mb-4">
+                        <legend class="des">NTP Server</legend>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">NTP Server / IP</div>
+                            <div class="col-12 col-sm-9"><input type="text" name="ntpAddr"/></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">NTP Port</div>
+                            <div class="col-12 col-sm-9"><input type="number" name="ntpPort"/></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">NTP Intervall (in Minutes, min. 5 Minutes)</div>
+                            <div class="col-12 col-sm-9"><input type="number" name="ntpIntvl"/></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">set System time</div>
+                            <div class="col-12 col-sm-9">
+                                <input type="button" name="ntpBtn" id="ntpBtn" class="btn" value="from browser" onclick="setTime()"/>
+                                <input type="button" name="ntpSync" id="ntpSync" class="btn" value="sync NTP" onclick="syncTime()"/><br/>
+                                <span id="apiResultNtp"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">System Time</div>
+                            <div class="col-12 col-sm-9 my-2"><span id="date"></span></div>
+                        </div>
+                    </fieldset>
+                    </div>
+
+                    <button type="button" class="s_collapsible">Sunrise & Sunset</button>
+                    <div class="s_content">
+                    <fieldset class="mb-4">
+                        <legend class="des">Sunrise & Sunset</legend>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">Latitude (decimal)</div>
+                            <div class="col-12 col-sm-9"><input type="number" name="sunLat" step="any"/></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">Longitude (decimal)</div>
+                            <div class="col-12 col-sm-9"><input type="number" name="sunLon" step="any"/></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">Offset (pre sunrise, post sunset)</div>
+                            <div class="col-12 col-sm-9"><select name="sunOffs"></select></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-8 col-sm-3">Pause polling inverters during night</div>
+                            <div class="col-4 col-sm-9"><input type="checkbox" name="sunDisNightCom"/></div>
+                        </div>
+                    </fieldset>
+                    </div>
+
+                    <button type="button" class="s_collapsible">MQTT</button>
+                    <div class="s_content">
+                    <fieldset class="mb-4">
+                        <legend class="des">MQTT</legend>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">Broker / Server IP</div>
+                            <div class="col-12 col-sm-9"><input type="text" name="mqttAddr"/></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">Port</div>
+                            <div class="col-12 col-sm-9"><input type="number" name="mqttPort"/></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">Client Id (optional)</div>
+                            <div class="col-12 col-sm-9"><input type="text" name="mqttClientId"/></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">Username (optional)</div>
+                            <div class="col-12 col-sm-9"><input type="text" name="mqttUser"/></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">Password (optional)</div>
+                            <div class="col-12 col-sm-9"><input type="password" name="mqttPwd"/></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">Topic</div>
+                            <div class="col-12 col-sm-9"><input type="text" name="mqttTopic" pattern="[A-Za-z0-9./#$%&=+_-]+" title="Invalid input" /></div>
+                        </div>
+                        <p class="des">Send Inverter data in a fixed interval, even if there is no change. A value of '0' disables the fixed interval. The data is published once it was successfully received from inverter. (default: 0)</p>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">Interval [s]</div>
+                            <div class="col-12 col-sm-9"><input type="number" name="mqttInterval" title="Invalid input" /></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-3 my-2">Discovery Config (homeassistant)</div>
+                            <div class="col-12 col-sm-9">
+                                <input type="button" name="mqttDiscovery" id="mqttDiscovery" class="btn" value="send" onclick="sendDiscoveryConfig()"/>
+                                <span id="apiResultMqtt"></span>
+                            </div>
+                        </div>
+                    </fieldset>
+                    </div>
+
+                    <div class="row mb-4 mt-4">
+                        <div class="col-8 col-sm-3">Reboot device after successful save</div>
+                        <div class="col-4 col-sm-9">
+                            <input type="checkbox" name="reboot" checked />
+                            <input type="submit" value="save" class="btn right"/>
+                        </div>
+                    </div>
+                </form>
+                <div class="hr mb-3 mt-3"></div>
+                <div class="mb-4 mt-4">
+                    <a class="btn" href="/erase">ERASE SETTINGS (not WiFi)</a>
+                    <fieldset class="mb-4">
+                        <legend class="des">Import / Export JSON Settings</legend>
+                        <div class="row mb-4 mt-4">
+                            <div class="col-12 col-sm-3">Import</div>
+                            <div class="col-12 col-sm-9">
+                                <form id="form" method="POST" action="/upload" enctype="multipart/form-data" accept-charset="utf-8">
+                                    <div class="row">
+                                        <div class="col-12 col-sm-8 my-2"><input type="file" name="upload"></div>
+                                        <div class="col-12 col-sm-4 my-2"><input type="button" class="btn" value="Import" onclick="hide()"></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row mb-4 mt-4">
+                            <div class="col-12 col-sm-3 my-2">Export</div>
+                            <div class="col-12 col-sm-9">
+                                <a class="btn" href="/get_setup" target="_blank">Export settings (JSON file)</a><span> (only values, passwords will be removed!)</span>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+        {#HTML_FOOTER}
+        <script type="text/javascript">
+            var highestId = 0;
+            var maxInv = 0;
+            var ts = 0;
+
+            
+            const re = /1[1,3][2,4,6,8][1,2,4].*/;
+
+            window.onload = function() {
+                for(it of document.getElementsByClassName("s_collapsible")) {
+                    it.addEventListener("click", function() {
+                        this.classList.toggle("active");
+                        var content = this.nextElementSibling;
+                        content.style.display = (content.style.display === "block") ? "none" : "block";
+                    });
+                }
+
+                document.getElementById("settings").addEventListener("submit", function() {
+                    var inputs = document.querySelectorAll("input[type='number']");
+                    for (var i = 0; i < inputs.length; i++) {
+                        if (inputs[i].value.indexOf(",") != -1)
+                            inputs[i].value = inputs[i].value.replace(",", ".");
+                    }
+                });
+            }
+
+            function apiCbWifi(obj) {
+                var e = document.getElementById("networks");
+                selDelAllOpt(e);
+                if(obj["success"])
+                    e.appendChild(opt("-1", "scanning ..."))
+                else
+                    e.appendChild(opt("-1", "Error: " + obj["error"]));
+            }
+
+            function apiCbNtp(obj) {
+                var e = document.getElementById("apiResultNtp");
+                if(obj["success"])
+                    e.innerHTML = "command excuted, set new time ...";
+                else
+                    e.innerHTML = "Error: " + obj["error"];
+            }
+
+            function apiCbNtp2(obj) {
+                var e = document.getElementById("apiResultNtp");
+                var date = new Date(obj["ts_now"] * 1000);
+                e.innerHTML = "synced at: " + toIsoDateStr(date) + ", difference: " + (ts - obj["ts_now"]) + "ms";
+            }
+
+            function apiCbMqtt(obj) {
+                var e = document.getElementById("apiResultMqtt");
+                if(obj["success"])
+                    e.innerHTML = "command excuted";
+                else
+                    e.innerHTML = "Error: " + obj["error"];
+            }
+
+            function setTime() {
+                var date = new Date();
+                var obj = new Object();
+                obj.cmd = "set_time";
+                obj.val = parseInt(date.getTime() / 1000);
+                getAjax("/api/setup", apiCbNtp, "POST", JSON.stringify(obj));
+                setTimeout(function() {getAjax('/api/index', apiCbNtp2)}, 2000);
+            }
+
+            function scan() {
+                var obj = new Object();
+                obj.cmd = "scan_wifi";
+                getAjax("/api/setup", apiCbWifi, "POST", JSON.stringify(obj));
+                setTimeout(function() {getAjax('/api/setup/networks', listNetworks)}, 5000);
+            }
+
+            function syncTime() {
+                var obj = new Object();
+                obj.cmd = "sync_ntp";
+                getAjax("/api/setup", apiCbNtp, "POST", JSON.stringify(obj));
+                setTimeout(function() {getAjax('/api/index', apiCbNtp2)}, 2000);
+            }
+
+            function sendDiscoveryConfig() {
+                var obj = new Object();
+                obj.cmd = "discovery_cfg";
+                getAjax("/api/setup", apiCbMqtt, "POST", JSON.stringify(obj));
+            }
+
+            function hide() {
+                document.getElementById("form").submit();
+                var e = document.getElementById("content");
+                e.replaceChildren(span("upload started"));
+            }
+
+            function delIv() {
+                var id = this.id.substring(0,4);
+                var e = document.getElementsByName(id + "Addr")[0];
+                e.value = "";
+                e.dispatchEvent(new Event("keyup"));
+                e.dispatchEvent(new Event("change"));
+                document.getElementsByName(id + "Name")[0].value = "";
+            }
+
+            function mlCb(id, des, chk=false) {
+                var cb = ml("input", {type: "checkbox", id: id, name: id}, "");
+                if(chk)
+                    cb.checked = true;
+                return ml("div", {class: "row mb-3"}, [
+                    ml("div", {class: "col-8 col-sm-3"}, des),
+                    ml("div", {class: "col-4 col-sm-9"}, cb)
+                ]);
+            }
+
+            function mlE(des, e) {
+                return ml("div", {class: "row mb-3"}, [
+                    ml("div", {class: "col-12 col-sm-3 my-2"}, des),
+                    ml("div", {class: "col-12 col-sm-9"}, e)
+                ]);
+            }
+
+            function parseSys(obj) {
+                for(var i of [["device", "device_name"], ["ssid", "ssid"], ["ap_pwd", "ap_pwd"]])
+                    document.getElementsByName(i[0])[0].value = obj[i[1]];
+                document.getElementsByName("hidd")[0].checked = obj["hidd"];
+                document.getElementsByName("darkMode")[0].checked = obj["dark_mode"];
+                document.getElementsByName("schedReboot")[0].checked = obj["sched_reboot"];
+                e = document.getElementsByName("adminpwd")[0];
+                if(!obj["pwd_set"])
+                    e.value = "";
+                var d = document.getElementById("prot_mask");
+                var a = ["Index", "Live", "Serial / Console", "Settings", "Update", "System"];
+                var el = [];
+                for(var i = 0; i < 6; i++) {
+                    var chk = ((obj["prot_mask"] & (1 << i)) == (1 << i));
+                    el.push(mlCb("protMask" + i, a[i], chk))
+                }
+                d.append(...el);
+            }
+
+            function parseGeneric(obj) {
+                parseNav(obj);
+                parseESP(obj);
+                parseRssi(obj);
+
+                ts = obj["ts_now"];
+                window.setInterval("tick()", 1000);
+            }
+
+            function parseStaticIp(obj) {
+                for(var i of [["ipAddr", "ip"], ["ipMask", "mask"], ["ipDns1", "dns1"], ["ipDns2", "dns2"], ["ipGateway", "gateway"]])
+                    if(null != obj[i[1]])
+                        document.getElementsByName(i[0])[0].value = obj[i[1]];
+            }
+
+            function parseMqtt(obj) {
+                for(var i of [["Addr", "broker"], ["Port", "port"], ["ClientId", "clientId"], ["User", "user"], ["Pwd", "pwd"], ["Topic", "topic"], ["Interval", "interval"]])
+                    document.getElementsByName("mqtt"+i[0])[0].value = obj[i[1]];
+            }
+
+            function parseNtp(obj) {
+                for(var i of [["ntpAddr", "addr"], ["ntpPort", "port"], ["ntpIntvl", "interval"]])
+                    document.getElementsByName(i[0])[0].value = obj[i[1]];
+            }
+
+            function parseSun(obj) {
+                document.getElementsByName("sunLat")[0].value = obj["lat"];
+                document.getElementsByName("sunLon")[0].value = obj["lon"];
+                document.getElementsByName("sunDisNightCom")[0].checked = obj["disnightcom"];
+                const sel = document.getElementsByName("sunOffs")[0];
+                for(var i = 0; i <= 60; i++) {
+                    sel.appendChild(opt(i, i + " minutes", (i == (obj["offs"] / 60))));
+                }
+            }
+
+            function tick() {
+                document.getElementById("date").innerHTML = toIsoDateStr((new Date((++ts) * 1000)));
+            }
+
+            function parse(root) {
+                if(null != root) {
+                    parseSys(root["system"]);
+                    parseGeneric(root["generic"]);
+                    parseStaticIp(root["static_ip"]);
+                    parseMqtt(root["mqtt"]);
+                    parseNtp(root["ntp"]);
+                    parseSun(root["sun"]);
+                }
+            }
+
+            function listNetworks(root) {
+                var s = document.getElementById("networks");
+                selDelAllOpt(s);
+                if(root["networks"].length > 0) {
+                    s.appendChild(opt("-1", "please select network"));
+                    for(i = 0; i < root["networks"].length; i++) {
+                        s.appendChild(opt(root["networks"][i]["ssid"], root["networks"][i]["ssid"] + " (" + root["networks"][i]["rssi"] + " dBm)"));
+                    }
+                } else
+                    s.appendChild(opt("-1", "no network found"));
+            }
+
+            function selNet() {
+                var s = document.getElementById("networks");
+                var e = document.getElementsByName("ssid")[0];
+                if(-1 != s.value)
+                    e.value = s.value;
+            }
+
+            getAjax("/api/setup", parse);
+        </script>
+    </body>
+</html>

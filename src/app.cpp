@@ -58,6 +58,7 @@ void listDir(fs::FS &fs, const char *dirname, uint8_t levels)
 }
 
 app::app()
+    : ei::Scheduler{}
 {
 
 }
@@ -84,6 +85,9 @@ void app::setup()
         // enable settings
         mSettings.setup();
     mSettings.getPtr(mConfig);
+
+    ei::Scheduler::setup(true);
+    DPRINT(DBG_INFO, F("Settings valid: "));
 
     // startup code
     // WIFI
@@ -128,7 +132,7 @@ void app::setup()
 
 void app::loop()
 {
-
+    ei::Scheduler::loop();
 }
 
 //-----------------------------------------------------------------------------
@@ -169,6 +173,42 @@ const char* app::getVersion()
 
 uint32_t app::getTimestamp()
 {
-    //return Scheduler::getTimestamp();
-    return mTimestamp;
+    return Scheduler::getTimestamp();
+    //return mTimestamp;
+}
+
+String app::getTimeStr(uint32_t offset)
+{
+    char str[10];
+    if (0 == mTimestamp)
+        sprintf(str, "n/a");
+    else
+        sprintf(str, "%02d:%02d:%02d ", hour(mTimestamp + offset), minute(mTimestamp + offset), second(mTimestamp + offset));
+    return String(str);
+}
+
+uint32_t app::getTimezoneOffset()
+{
+    return mApi.getTimezoneOffset();
+}
+
+uint32_t app::getUptime()
+{
+    return Scheduler::getUptime();
+}
+
+void app::setTimestamp(uint32_t newTime)
+{
+    DPRINT(DBG_DEBUG, F("setTimestamp: "));
+    DBGPRINTLN(String(newTime));
+    if (0 == newTime)
+    {
+#if defined(ETHERNET)
+        mEth.updateNtpTime();
+#else  /* defined(ETHERNET) */
+        mWifi.getNtpTime();
+#endif /* defined(ETHERNET) */
+    }
+    else
+        Scheduler::setTimestamp(newTime);
 }
