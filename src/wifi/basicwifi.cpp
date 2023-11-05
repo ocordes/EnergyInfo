@@ -36,13 +36,8 @@ void basicwifi::setup(settings_t *config, uint32_t *utcTimestamp, appWifiCb cb) 
     mScanActive = false;
     mScanCnt    = 0;
 
-    #if defined(ESP8266)
-    wifiConnectHandler = WiFi.onStationModeConnected(std::bind(&basicwifi::onConnect, this, std::placeholders::_1));
-    wifiGotIPHandler = WiFi.onStationModeGotIP(std::bind(&basicwifi::onGotIP, this, std::placeholders::_1));
-    wifiDisconnectHandler = WiFi.onStationModeDisconnected(std::bind(&basicwifi::onDisconnect, this, std::placeholders::_1));
-    #else
+    
     WiFi.onEvent(std::bind(&basicwifi::onWiFiEvent, this, std::placeholders::_1));
-    #endif
 
     setupWifi(true);
 }
@@ -50,30 +45,27 @@ void basicwifi::setup(settings_t *config, uint32_t *utcTimestamp, appWifiCb cb) 
 
 //-----------------------------------------------------------------------------
 void basicwifi::setupWifi(bool startAP = false) {
-    #if !defined(FB_WIFI_OVERRIDDEN)
-        if(startAP) {
-            setupAp();
-            delay(1000);
-        }
-    #endif
-    #if !defined(AP_ONLY)
-        #if defined(FB_WIFI_OVERRIDDEN)
-            snprintf(mConfig->sys.stationSsid, SSID_LEN, "%s", FB_WIFI_SSID);
-            snprintf(mConfig->sys.stationPwd, PWD_LEN, "%s", FB_WIFI_PWD);
-            setupStation();
-        #else
+    if(startAP) {
+        setupAp();
+        delay(1000);
+    }
+
+        //#if defined(FB_WIFI_OVERRIDDEN)
+        //    snprintf(mConfig->sys.stationSsid, SSID_LEN, "%s", FB_WIFI_SSID);
+        //    snprintf(mConfig->sys.stationPwd, PWD_LEN, "%s", FB_WIFI_PWD);
+        //    setupStation();
+        //#else
             if(mConfig->valid) {
                 if(strncmp(mConfig->sys.stationSsid, FB_WIFI_SSID, 14) != 0)
                     setupStation();
             }
-        #endif
-    #endif
+        //#endif
+
 }
 
 
 //-----------------------------------------------------------------------------
 void basicwifi::tickWifiLoop() {
-    #if !defined(AP_ONLY)
     if(mStaConn != GOT_IP) {
         if (WiFi.softAPgetStationNum() > 0) { // do not reconnect if any AP connection exists
             if(mStaConn != IN_AP_MODE) {
@@ -109,19 +101,12 @@ void basicwifi::tickWifiLoop() {
             DBGPRINTLN(String(mConfig->sys.stationSsid));
             mScanCnt = 0;
             mScanActive = true;
-            #if defined(ESP8266)
-            WiFi.scanNetworks(true, true, 0U, ([this] () {
-                if(mConfig->sys.isHidden)
-                    return (uint8_t *)NULL;
-                return (uint8_t *)(mConfig->sys.stationSsid);
-            })());
-            #else
+            
             WiFi.scanNetworks(true, true, false, 300U, 0U, ([this] () {
                 if(mConfig->sys.isHidden)
                     return (char*)NULL;
                 return (mConfig->sys.stationSsid);
             })());
-            #endif
             return;
         }
         DBGPRINT(F("reconnect in "));
@@ -154,7 +139,6 @@ void basicwifi::tickWifiLoop() {
             mCnt = 0;
         }
     }
-    #endif
 }
 
 
@@ -383,46 +367,28 @@ void basicwifi::connectionEvent(WiFiStatus_t status) {
 
 
 //-----------------------------------------------------------------------------
-#if defined(ESP8266)
-    //-------------------------------------------------------------------------
-    void basicwifi::onConnect(const WiFiEventStationModeConnected& event) {
-        connectionEvent(CONNECTED);
+//-------------------------------------------------------------------------
+void basicwifi::onWiFiEvent(WiFiEvent_t event) {
+    DBGPRINT(F("Wifi event: "));
+    DBGPRINTLN(String(event));
+
+    switch(event) {
+        case SYSTEM_EVENT_STA_CONNECTED:
+            connectionEvent(CONNECTED);
+            break;
+
+        case SYSTEM_EVENT_STA_GOT_IP:
+            connectionEvent(GOT_IP);
+            break;
+
+        case SYSTEM_EVENT_STA_DISCONNECTED:
+            connectionEvent(DISCONNECTED);
+            break;
+
+        default:
+            break;
     }
-
-    //-------------------------------------------------------------------------
-    void basicwifi::onGotIP(const WiFiEventStationModeGotIP& event) {
-        connectionEvent(GOT_IP);
-    }
-
-    //-------------------------------------------------------------------------
-    void basicwifi::onDisconnect(const WiFiEventStationModeDisconnected& event) {
-        connectionEvent(DISCONNECTED);
-    }
-
-#else
-    //-------------------------------------------------------------------------
-    void basicwifi::onWiFiEvent(WiFiEvent_t event) {
-        DBGPRINT(F("Wifi event: "));
-        DBGPRINTLN(String(event));
-
-        switch(event) {
-            case SYSTEM_EVENT_STA_CONNECTED:
-                connectionEvent(CONNECTED);
-                break;
-
-            case SYSTEM_EVENT_STA_GOT_IP:
-                connectionEvent(GOT_IP);
-                break;
-
-            case SYSTEM_EVENT_STA_DISCONNECTED:
-                connectionEvent(DISCONNECTED);
-                break;
-
-            default:
-                break;
-        }
-    }
-#endif
+}
 
 
 //-----------------------------------------------------------------------------

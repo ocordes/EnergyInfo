@@ -88,15 +88,23 @@ void app::setup()
 
     ei::Scheduler::setup(true);
     DPRINT(DBG_INFO, F("Settings valid: "));
+    if (mSettings.getValid())
+        DBGPRINTLN(F("true"));
+    else
+        DBGPRINTLN(F("false"));
 
     // startup code
     // WIFI
+    //mInnerLoopCb = std::bind(&app::loopWifi, this);
     mWifi.setup(mConfig, &mTimestamp, std::bind(&app::onNetwork, this, std::placeholders::_1));
+    everySec(std::bind(&basicwifi::tickWifiLoop, &mWifi), "wifiL");
 
     mWeb.setup(this, mConfig);
     mWeb.setProtection(strlen(mConfig->sys.adminPwd) != 0);
 
     mApi.setup(this, mWeb.getWebSrvPtr(), mConfig);
+
+    
 
     // if (!SPIFFS.begin(true))
     // {
@@ -139,8 +147,8 @@ void app::loop()
 void app::onNetwork(bool gotIp)
 {
     DPRINTLN(DBG_DEBUG, F("onNetwork"));
-    //ah::Scheduler::resetTicker();
-    //regularTickers(); // reinstall regular tickers
+    ei::Scheduler::resetTicker();
+    regularTickers(); // reinstall regular tickers
     if (gotIp)
     {
     }
@@ -197,6 +205,35 @@ uint32_t app::getUptime()
     return Scheduler::getUptime();
 }
 
+void app::regularTickers(void)
+{
+    DPRINTLN(DBG_DEBUG, F("regularTickers"));
+    everySec(std::bind(&WebType::tickSecond, &mWeb), "webSc");
+    // Plugins
+    //OC if (mConfig->plugin.display.type != 0)
+    //OC    everySec(std::bind(&DisplayType::tickerSecond, &mDisplay), "disp");
+    //OC every(std::bind(&PubSerialType::tick, &mPubSerial), mConfig->serial.interval, "uart");
+}
+
+bool app::saveSettings(bool reboot)
+{
+    mShowRebootRequest = true; // only message on index, no reboot
+    mSavePending = true;
+    mSaveReboot = reboot;
+    if (reboot)
+    {
+        onNetwork(false);
+        ei::Scheduler::resetTicker();
+    }
+    once(std::bind(&app::tickSave, this), 3, "save");
+    return true;
+}
+
+void app::setRebootFlag()
+{
+    once(std::bind(&app::tickReboot, this), 3, "rboot");
+}
+
 void app::setTimestamp(uint32_t newTime)
 {
     DPRINT(DBG_DEBUG, F("setTimestamp: "));
@@ -211,4 +248,24 @@ void app::setTimestamp(uint32_t newTime)
     }
     else
         Scheduler::setTimestamp(newTime);
+}
+
+void app::tickReboot(void)
+{
+    DPRINTLN(DBG_INFO, F("Rebooting..."));
+    onNetwork(false);
+    ei::Scheduler::resetTicker();
+    WiFi.disconnect();
+    delay(200);
+    ESP.restart();
+}
+
+void app::tickSave(void)
+{
+    if (!mSettings.saveSettings())
+        mSaveReboot = false;
+    mSavePending = false;
+
+    if (mSaveReboot)
+        setRebootFlag();
 }

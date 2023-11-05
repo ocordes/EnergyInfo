@@ -20,6 +20,18 @@
 
 #define LOGOUT_TIMEOUT (20 * 60)
 
+// Timezone
+#define TIMEZONE 1
+
+// default NTP server uri
+#define DEF_NTP_SERVER_NAME "pool.ntp.org"
+
+// default NTP server port
+#define DEF_NTP_PORT 123
+
+// NTP refresh interval in ms (default 12h)
+#define NTP_REFRESH_INTERVAL 12 * 3600 * 1000
+
 
 // check if necessary
 #define PROT_MASK_INDEX 0x0001
