@@ -47,13 +47,21 @@ private:
     String getTimeStr(uint32_t offset = 0);
     uint32_t getTimezoneOffset();
     uint32_t getUptime();
-
+    void regularTickers(void);
+    bool saveSettings(bool reboot);
+    void setRebootFlag();
     void setTimestamp(uint32_t newTime);
+    void tickReboot(void);
+    void tickSave(void);
 
-    char mVersion[12]; 
+    char mVersion[12];
     uint32_t mTimestamp;
     settings mSettings;
     settings_t *mConfig;
+    bool mSavePending;
+    bool mSaveReboot;
+    bool mShowRebootRequest;
+
     basicwifi mWifi;
     WebType mWeb;
     RestApi mApi;

@@ -332,8 +332,8 @@ class RestApi {
             getNtp(obj.createNestedObject(F("ntp")));
             getSun(obj.createNestedObject(F("sun")));
             getStaticIp(obj.createNestedObject(F("static_ip")));
-            char out[300];
-            serializeJson(obj, out, 300);
+            char out[600];
+            serializeJson(obj, out, 600);
             DPRINTLN(DBG_INFO, "RestApi: getSetup " + String(out));
        }
 

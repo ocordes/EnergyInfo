@@ -275,10 +275,10 @@ private:
 
         snprintf(mCfg.sys.deviceName, DEVNAME_LEN, DEF_DEVICE_NAME);
 
-        // OC NTP
-        // snprintf(mCfg.ntp.addr, NTP_ADDR_LEN, "%s", DEF_NTP_SERVER_NAME);
-        // mCfg.ntp.port = DEF_NTP_PORT;
-        // mCfg.ntp.interval = 720;
+        // NTP
+        snprintf(mCfg.ntp.addr, NTP_ADDR_LEN, "%s", DEF_NTP_SERVER_NAME);
+        mCfg.ntp.port = DEF_NTP_PORT;
+        mCfg.ntp.interval = 720;
 
 
         // mCfg.serial.interval = SERIAL_INTERVAL;
