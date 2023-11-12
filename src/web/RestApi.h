@@ -236,9 +236,9 @@ class RestApi {
 
         void getHtmlSave(AsyncWebServerRequest *request, JsonObject obj) {
             getGeneric(request, obj.createNestedObject(F("generic")));
-            // obj["pending"] = (bool)mApp->getSavePending();
-            // obj["success"] = (bool)mApp->getLastSaveSucceed();
-            // obj["reboot"] = (bool)mApp->getShouldReboot();
+            obj["pending"] = (bool)mApp->getSavePending();
+            obj["success"] = (bool)mApp->getLastSaveSucceed();
+            obj["reboot"] = (bool)mApp->getShouldReboot();
         }
 
         void getReboot(AsyncWebServerRequest *request, JsonObject obj) {
@@ -271,13 +271,13 @@ class RestApi {
         }
 
         void getMqtt(JsonObject obj) {
-            // obj[F("broker")]     = String(mConfig->mqtt.broker);
-            // obj[F("clientId")]   = String(mConfig->mqtt.clientId);
-            // obj[F("port")]       = String(mConfig->mqtt.port);
-            // obj[F("user")]       = String(mConfig->mqtt.user);
-            // obj[F("pwd")]        = (strlen(mConfig->mqtt.pwd) > 0) ? F("{PWD}") : String("");
+            obj[F("broker")]     = String(mConfig->mqtt.broker);
+            obj[F("clientId")]   = String(mConfig->mqtt.clientId);
+            obj[F("port")]       = String(mConfig->mqtt.port);
+            obj[F("user")]       = String(mConfig->mqtt.user);
+            obj[F("pwd")]        = (strlen(mConfig->mqtt.pwd) > 0) ? F("{PWD}") : String("");
             // obj[F("topic")]      = String(mConfig->mqtt.topic);
-            // obj[F("interval")]   = String(mConfig->mqtt.interval);
+            obj[F("interval")]   = String(mConfig->mqtt.interval);
         }
 
         void getNtp(JsonObject obj) {
@@ -314,11 +314,11 @@ class RestApi {
            // obj[F("ts_offset")]    = mConfig->sun.offsetSec;
 
 
-           // if((!mApp->getMqttIsConnected()) && (String(mConfig->mqtt.broker).length() > 0))
+           //if((!mApp->getMqttIsConnected()) && (String(mConfig->mqtt.broker).length() > 0))
            //     warn.add(F("MQTT is not connected"));
 
-           // JsonArray info = obj.createNestedArray(F("infos"));
-           // if(mApp->getMqttIsConnected())
+           //JsonArray info = obj.createNestedArray(F("infos"));
+           //if(mApp->getMqttIsConnected())
            //     info.add(F("MQTT is connected, ") + String(mApp->getMqttTxCnt()) + F(" packets sent, ") + String(mApp->getMqttRxCnt()) + F(" packets received"));
            // if(mConfig->mqtt.interval > 0)
            //     info.add(F("MQTT publishes in a fixed interval of ") + String(mConfig->mqtt.interval) + F(" seconds"));
@@ -417,12 +417,10 @@ class RestApi {
             else 
                 if(F("set_time") == jsonIn[F("cmd")])
                     mApp->setTimestamp(jsonIn[F("val")]);
-                else if(F("sync_ntp") == jsonIn[F("cmd")])
+                else if(F("sync_ntp") == jsonIn[F("cmd")]) {
                     mApp->setTimestamp(0); // 0: update ntp flag
-                else if(F("serial_utc_offset") == jsonIn[F("cmd")])
+                } else if(F("serial_utc_offset") == jsonIn[F("cmd")]) {
                     mTimezoneOffset = jsonIn[F("val")];
-                else if(F("discovery_cfg") == jsonIn[F("cmd")]) {
-                    //mApp->setMqttDiscoveryFlag(); // for homeassistant
                 } else {
                     jsonOut[F("error")] = F("unknown cmd");
                     return false;

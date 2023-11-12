@@ -19,9 +19,9 @@ class IApp {
         virtual bool saveSettings(bool stopFs) = 0;
         // virtual bool readSettings(const char *path) = 0;
         // virtual bool eraseSettings(bool eraseWifi) = 0;
-        // virtual bool getSavePending() = 0;
-        // virtual bool getLastSaveSucceed() = 0;
-        // virtual bool getShouldReboot() = 0;
+        virtual bool getSavePending() = 0;
+        virtual bool getLastSaveSucceed() = 0;
+        virtual bool getShouldReboot() = 0;
         // virtual void setOnUpdate() = 0;
         // virtual void setRebootFlag() = 0;
         virtual const char *getVersion() = 0;
@@ -45,7 +45,7 @@ class IApp {
         // virtual bool getSettingsValid() = 0;
         // virtual void setMqttDiscoveryFlag() = 0;
         
-        // virtual bool getMqttIsConnected() = 0;
+        virtual bool getMqttIsConnected() = 0;
         // virtual uint32_t getMqttRxCnt() = 0;
         // virtual uint32_t getMqttTxCnt() = 0;
 

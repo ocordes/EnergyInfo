@@ -490,23 +490,22 @@ class Web {
 
             
 
-            // // mqtt
-            // if (request->arg("mqttAddr") != "") {
-            //     String addr = request->arg("mqttAddr");
-            //     addr.trim();
-            //     addr.toCharArray(mConfig->mqtt.broker, MQTT_ADDR_LEN);
-            // } else
-            //     mConfig->mqtt.broker[0] = '\0';
-            // request->arg("mqttClientId").toCharArray(mConfig->mqtt.clientId, MQTT_CLIENTID_LEN);
-            // request->arg("mqttUser").toCharArray(mConfig->mqtt.user, MQTT_USER_LEN);
-            // if (request->arg("mqttPwd") != "{PWD}")
-            //     request->arg("mqttPwd").toCharArray(mConfig->mqtt.pwd, MQTT_PWD_LEN);
+            // mqtt
+            if (request->arg("mqttAddr") != "") {
+                String addr = request->arg("mqttAddr");
+                addr.trim();
+                addr.toCharArray(mConfig->mqtt.broker, MQTT_ADDR_LEN);
+            } else
+                mConfig->mqtt.broker[0] = '\0';
+            request->arg("mqttClientId").toCharArray(mConfig->mqtt.clientId, MQTT_CLIENTID_LEN);
+            request->arg("mqttUser").toCharArray(mConfig->mqtt.user, MQTT_USER_LEN);
+            if (request->arg("mqttPwd") != "{PWD}")
+                request->arg("mqttPwd").toCharArray(mConfig->mqtt.pwd, MQTT_PWD_LEN);
             // request->arg("mqttTopic").toCharArray(mConfig->mqtt.topic, MQTT_TOPIC_LEN);
-            // mConfig->mqtt.port = request->arg("mqttPort").toInt();
-            // mConfig->mqtt.interval = request->arg("mqttInterval").toInt();
+            mConfig->mqtt.port = request->arg("mqttPort").toInt();
+            mConfig->mqtt.interval = request->arg("mqttInterval").toInt();
 
             
-
             mApp->saveSettings((request->arg("reboot") == "on"));
 
             AsyncWebServerResponse *response = request->beginResponse_P(200, F("text/html; charset=UTF-8"), save_html, save_html_len);

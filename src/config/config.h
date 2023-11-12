@@ -52,4 +52,25 @@
 #define DEF_PROT_API 0x0000
 #define DEF_PROT_MQTT 0x0000
 
+// default mqtt interval
+#define MQTT_INTERVAL 90
+
+// default MQTT broker uri
+#define DEF_MQTT_BROKER "\0"
+
+// default MQTT port
+#define DEF_MQTT_PORT 1883
+
+// default MQTT user
+#define DEF_MQTT_USER "\0"
+
+// default MQTT pwd
+#define DEF_MQTT_PWD "\0"
+
+// discovery prefix
+#define MQTT_DISCOVERY_PREFIX "homeassistant"
+
+// reconnect delay
+#define MQTT_RECONNECT_DELAY 5000
+
 #endif /*__CONFIG_H__*/
