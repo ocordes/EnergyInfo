@@ -57,6 +57,15 @@ typedef struct
     uint16_t interval; // in minutes
 } cfgNtp_t;
 
+typedef struct
+{
+    char broker[MQTT_ADDR_LEN];
+    uint16_t port;
+    char clientId[MQTT_CLIENTID_LEN];
+    char user[MQTT_USER_LEN];
+    char pwd[MQTT_PWD_LEN];
+    uint16_t interval;
+} cfgMqtt_t;
 
 typedef struct
 {
@@ -66,7 +75,7 @@ typedef struct
     cfgNtp_t ntp;
     //cfgSun_t sun;
     //cfgSerial_t serial;
-    //cfgMqtt_t mqtt;
+    cfgMqtt_t mqtt;
     //cfgLed_t led;
     //cfgInst_t inst;
     //plugins_t plugin;
@@ -159,14 +168,14 @@ public:
                 //     jsonNrf(root[F("nrf")]);
                 // if (root.containsKey(F("cmt")))
                 //     jsonCmt(root[F("cmt")]);
-                // if (root.containsKey(F("ntp")))
-                //     jsonNtp(root[F("ntp")]);
+                if (root.containsKey(F("ntp")))
+                     jsonNtp(root[F("ntp")]);
                 // if (root.containsKey(F("sun")))
                 //     jsonSun(root[F("sun")]);
                 // if (root.containsKey(F("serial")))
                 //     jsonSerial(root[F("serial")]);
-                // if (root.containsKey(F("mqtt")))
-                //     jsonMqtt(root[F("mqtt")]);
+                if (root.containsKey(F("mqtt")))
+                     jsonMqtt(root[F("mqtt")]);
                 // if (root.containsKey(F("led")))
                 //     jsonLed(root[F("led")]);
                 // if (root.containsKey(F("plugin")))
@@ -194,10 +203,10 @@ public:
         jsonNetwork(root.createNestedObject(F("wifi")), true);
         //jsonNrf(root.createNestedObject(F("nrf")), true);
         //jsonCmt(root.createNestedObject(F("cmt")), true);
-        //jsonNtp(root.createNestedObject(F("ntp")), true);
+        jsonNtp(root.createNestedObject(F("ntp")), true);
         //jsonSun(root.createNestedObject(F("sun")), true);
         //jsonSerial(root.createNestedObject(F("serial")), true);
-        //jsonMqtt(root.createNestedObject(F("mqtt")), true);
+        jsonMqtt(root.createNestedObject(F("mqtt")), true);
         //jsonLed(root.createNestedObject(F("led")), true);
         //jsonPlugin(root.createNestedObject(F("plugin")), true);
         //jsonInst(root.createNestedObject(F("inst")), true);
@@ -285,12 +294,12 @@ private:
         // mCfg.serial.showIv = false;
         // mCfg.serial.debug = false;
 
-        // mCfg.mqtt.port = DEF_MQTT_PORT;
-        // snprintf(mCfg.mqtt.broker, MQTT_ADDR_LEN, "%s", DEF_MQTT_BROKER);
-        // snprintf(mCfg.mqtt.user, MQTT_USER_LEN, "%s", DEF_MQTT_USER);
-        // snprintf(mCfg.mqtt.pwd, MQTT_PWD_LEN, "%s", DEF_MQTT_PWD);
+        mCfg.mqtt.port = DEF_MQTT_PORT;
+        snprintf(mCfg.mqtt.broker, MQTT_ADDR_LEN, "%s", DEF_MQTT_BROKER);
+        snprintf(mCfg.mqtt.user, MQTT_USER_LEN, "%s", DEF_MQTT_USER);
+        snprintf(mCfg.mqtt.pwd, MQTT_PWD_LEN, "%s", DEF_MQTT_PWD);
         // snprintf(mCfg.mqtt.topic, MQTT_TOPIC_LEN, "%s", DEF_MQTT_TOPIC);
-        // mCfg.mqtt.interval = 0; // off
+        mCfg.mqtt.interval = 0; // off
     }
 
     void jsonNetwork(JsonObject obj, bool set = false)
@@ -339,6 +348,45 @@ private:
 
             if (mCfg.sys.protectionMask == 0)
                 mCfg.sys.protectionMask = DEF_PROT_INDEX | DEF_PROT_LIVE | DEF_PROT_SERIAL | DEF_PROT_SETUP | DEF_PROT_UPDATE | DEF_PROT_SYSTEM | DEF_PROT_API | DEF_PROT_MQTT;
+        }
+    }
+
+    void jsonMqtt(JsonObject obj, bool set = false)
+    {
+        if (set)
+        {
+            obj[F("broker")] = mCfg.mqtt.broker;
+            obj[F("port")] = mCfg.mqtt.port;
+            obj[F("user")] = mCfg.mqtt.user;
+            obj[F("pwd")] = mCfg.mqtt.pwd;
+            obj[F("intvl")] = mCfg.mqtt.interval;
+        }
+        else
+        {
+            getVal<uint16_t>(obj, F("port"), &mCfg.mqtt.port);
+            getVal<uint16_t>(obj, F("intvl"), &mCfg.mqtt.interval);
+            getChar(obj, F("broker"), mCfg.mqtt.broker, MQTT_ADDR_LEN);
+            getChar(obj, F("user"), mCfg.mqtt.user, MQTT_USER_LEN);
+            getChar(obj, F("pwd"), mCfg.mqtt.pwd, MQTT_PWD_LEN);
+        }
+    }
+
+    void jsonNtp(JsonObject obj, bool set = false)
+    {
+        if (set)
+        {
+            obj[F("addr")] = mCfg.ntp.addr;
+            obj[F("port")] = mCfg.ntp.port;
+            obj[F("intvl")] = mCfg.ntp.interval;
+        }
+        else
+        {
+            getChar(obj, F("addr"), mCfg.ntp.addr, NTP_ADDR_LEN);
+            getVal<uint16_t>(obj, F("port"), &mCfg.ntp.port);
+            getVal<uint16_t>(obj, F("intvl"), &mCfg.ntp.interval);
+
+            if (mCfg.ntp.interval < 5)   // minimum 5 minutes
+                mCfg.ntp.interval = 720; // default -> 12 hours
         }
     }
 

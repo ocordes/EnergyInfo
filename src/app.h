@@ -1,7 +1,7 @@
 // app.h
 
 // written by: Oliver Cordes 2023-09-18
-// changed by: Oliver Cordes 2023-09-18
+// changed by: Oliver Cordes 2023-11-12
 
 #ifndef __APP_H__
 #define __APP_H__
@@ -13,6 +13,7 @@
 
 #include "defines.h"
 
+#include "mqtt/mqtt_client.h"
 #include "utils/scheduler.h"
 #include "web/RestApi.h"
 #include "web/web.h"
@@ -42,11 +43,15 @@ private:
     bool getProtection(AsyncWebServerRequest *request);
     void scanAvailNetworks();
     bool getAvailNetworks(JsonObject obj);
-    const char *getVersion();
+    bool getMqttIsConnected();
+    bool getSavePending();
+    bool getLastSaveSucceed();
+    bool getShouldReboot();
     uint32_t getTimestamp();
     String getTimeStr(uint32_t offset = 0);
     uint32_t getTimezoneOffset();
     uint32_t getUptime();
+    const char *getVersion();
     void regularTickers(void);
     bool saveSettings(bool reboot);
     void setRebootFlag();
@@ -65,6 +70,11 @@ private:
     basicwifi mWifi;
     WebType mWeb;
     RestApi mApi;
+
+    // mqtt
+    MqttEnClient mMqtt;
+    //bool mMqttReconnect;
+    bool mMqttEnabled;
 };
 
 #endif

@@ -104,39 +104,41 @@ void app::setup()
 
     mApi.setup(this, mWeb.getWebSrvPtr(), mConfig);
 
-    
+    mMqttEnabled = (mConfig->mqtt.broker[0] > 0);
+    if (mMqttEnabled)
+    {
+        mMqtt.setup(&mConfig->mqtt, mConfig->sys.deviceName, mVersion, &mTimestamp, &mUptime);
+        //mMqtt.setSubscriptionCb(std::bind(&app::mqttSubRxCb, this, std::placeholders::_1));
+    }
 
-    // if (!SPIFFS.begin(true))
-    // {
-    //     Serial.println("An Error has occurred while mounting SPIFFS");
-    //     return;
-    // }
+        // if (!SPIFFS.begin(true))
+        // {
+        //     Serial.println("An Error has occurred while mounting SPIFFS");
+        //     return;
+        // }
 
+        // delay(1000);
 
-    
-    // delay(1000);
+        // listDir(SPIFFS, "/", 3);
 
-    // listDir(SPIFFS, "/", 3);
+        // File file = SPIFFS.open("/test.txt", "r");
+        // if (!file)
+        // {
+        //     Serial.println("Failed to open file for reading");
+        //     Serial.flush();
+        //     return;
+        // }
 
-    // File file = SPIFFS.open("/test.txt", "r");
-    // if (!file)
-    // {
-    //     Serial.println("Failed to open file for reading");
-    //     Serial.flush();
-    //     return;
-    // }
+        // Serial.println("File Content:");
+        // while (file.available())
+        // {
+        //     Serial.write(file.read());
+        // }
+        // Serial.flush();
+        // file.close();
 
-    // Serial.println("File Content:");
-    // while (file.available())
-    // {
-    //     Serial.write(file.read());
-    // }
-    // Serial.flush();
-    // file.close();
-
-    // Serial.println("Setup complete!");
-}
-
+        // Serial.println("Setup complete!");
+    }
 
 void app::loop()
 {
@@ -174,9 +176,24 @@ bool app::getAvailNetworks(JsonObject obj)
     return mWifi.getAvailNetworks(obj);
 }
 
-const char* app::getVersion()
+bool app::getMqttIsConnected()
 {
-    return mVersion;
+    return mMqtt.isConnected();
+}
+
+bool app::getSavePending()
+{
+    return mSavePending;
+}
+
+bool app::getLastSaveSucceed()
+{
+    return mSettings.getLastSaveSucceed();
+}
+
+bool app::getShouldReboot()
+{
+    return mSaveReboot;
 }
 
 uint32_t app::getTimestamp()
@@ -203,6 +220,11 @@ uint32_t app::getTimezoneOffset()
 uint32_t app::getUptime()
 {
     return Scheduler::getUptime();
+}
+
+const char *app::getVersion()
+{
+    return mVersion;
 }
 
 void app::regularTickers(void)
